@@ -3,6 +3,8 @@ import {useState, useMemo, useEffect, useRef, useReducer, useCallback} from "rea
 import FuncContextComp from "./FuncContextComp";
 import ThemeContext from "./ThemeContext";
 import List from "./List";
+import useLocal from "./useLocal";
+import useUpdaterLogger from "./useUpdateLogger";
 
 function reducer(state, action){
   switch (action.type) {
@@ -22,7 +24,10 @@ function App() {
       renderCount = useRef(1),
       inputRef = useRef(),
       [state, dispatch] = useReducer(reducer, {counter: 0}),
-      [num, setNum] = useState(1);
+      [num, setNum] = useState(1),
+      [cookie, setCookie] = useLocal('names', ['hamid','mounir']);
+
+  useUpdaterLogger(num)
 
   const doubleNumber = useMemo(() => {
     return slowFunc(number)
@@ -60,6 +65,10 @@ function App() {
   function decrement() {
     dispatch({type: 'dec'})
   }
+  function saveName() {
+    setCookie(prev => [...prev, name]);
+    setName('');
+  }
 
 
   return (
@@ -82,6 +91,8 @@ function App() {
         <input type="number" value={num} onChange={e => setNum(parseInt(e.target.value))}/>
         <button onClick={() => setDark(oldTheme => !oldTheme)}>Toggle theme</button>
         <List getItems={getItems} />
+        <button onClick={saveName}> save name </button>
+        {cookie.map(name => <span key={name}>{name}</span>)}
       </header>
     </div>
   );
