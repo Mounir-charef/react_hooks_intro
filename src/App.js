@@ -1,5 +1,5 @@
 import './App.css';
-import {useState, useMemo, useEffect, useRef, useReducer, useCallback} from "react";
+import {useState, useMemo, useEffect, useRef, useReducer, useCallback, useLayoutEffect} from "react";
 import FuncContextComp from "./FuncContextComp";
 import ThemeContext from "./ThemeContext";
 import List from "./List";
@@ -25,7 +25,10 @@ function App() {
       inputRef = useRef(),
       [state, dispatch] = useReducer(reducer, {counter: 0}),
       [num, setNum] = useState(1),
-      [cookie, setCookie] = useLocal('names', ['hamid','mounir']);
+      [cookie, setCookie] = useLocal('names', ['hamid','mounir']),
+      [show, setShow] = useState(false),
+      button = useRef(),
+      popup = useRef();
 
   useUpdaterLogger(num)
 
@@ -49,6 +52,14 @@ function App() {
   useEffect(() => {
     renderCount.current++
   }, [name])
+
+
+  useLayoutEffect(() => {
+    if(popup.current == null || button.current == null ) return
+    const {bottom, left} = button.current.getBoundingClientRect()
+    popup.current.style.top = `${bottom - 70}px`
+    popup.current.style.left = `${left + 500}px`
+  }, [show])
 
   const focus = () => {
     inputRef.current.focus()
@@ -93,6 +104,16 @@ function App() {
         <List getItems={getItems} />
         <button onClick={saveName}> save name </button>
         {cookie.map(name => <span key={name}>{name}</span>)}
+        <div className='useLayoutEffect'>
+          <button ref={button} onClick={() => setShow(prev => !prev)}>
+            Click here
+          </button>
+          {show && (
+              <div style={{position: 'absolute'}} ref={popup}>
+                This is a popup with useLayoutEffect
+              </div>
+          )}
+        </div>
       </header>
     </div>
   );
